@@ -6,15 +6,11 @@
       "use": "@vercel/static"
     },
     {
-      "src": "*.css", 
+      "src": "*.css",
       "use": "@vercel/static"
     },
     {
       "src": "*.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "supabase-config.js",
       "use": "@vercel/static"
     }
   ],
@@ -28,7 +24,7 @@
       "dest": "/login.html"
     },
     {
-      "src": "/register",
+      "src": "/register", 
       "dest": "/register.html"
     },
     {
