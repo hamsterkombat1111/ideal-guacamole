@@ -24,7 +24,7 @@
       "dest": "/login.html"
     },
     {
-      "src": "/register", 
+      "src": "/register",
       "dest": "/register.html"
     },
     {
