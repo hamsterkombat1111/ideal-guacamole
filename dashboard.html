@@ -59,12 +59,10 @@
                 return;
             }
 
-            // Заполняем информацию о пользователе
             document.getElementById('userId').textContent = currentUser.id;
             document.getElementById('userName').textContent = currentUser.username;
             document.getElementById('userEmail').textContent = currentUser.email;
             
-            // Форматируем даты
             if (currentUser.created_at) {
                 document.getElementById('userCreated').textContent = 
                     new Date(currentUser.created_at).toLocaleString('ru-RU');
@@ -75,7 +73,6 @@
                     new Date(currentUser.last_login).toLocaleString('ru-RU');
             }
 
-            // Выход
             document.getElementById('logoutBtn').addEventListener('click', function() {
                 sessionStorage.removeItem('currentUser');
                 window.location.href = 'index.html';
