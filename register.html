@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация - Supabase DB</title>
     <link rel="stylesheet" href="style.css">
-    <!-- ПРАВИЛЬНЫЕ CDN -->
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 </head>
@@ -53,17 +53,23 @@
         </footer>
     </div>
 
-    <script src="supabase-config.js"></script>
     <script>
+        // Инициализация Supabase прямо в HTML
+        const SUPABASE_URL = 'https://ghpcfjbissjxazdepndr.supabase.co';
+        const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocGNmamJpc3NqeGF6ZGVwbmRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTU0NzgsImV4cCI6MjA3Mjc5MTQ3OH0.7K84ZwQVZ07Ode98druvxnrR9HbjMpotegorn1Ncex8';
+        
+        // Ждем загрузки Supabase
         document.addEventListener('DOMContentLoaded', function() {
-            // Проверка что Supabase загружен
+            // Проверяем что Supabase загружен
             if (typeof supabase === 'undefined') {
+                console.error('Supabase не загружен');
                 showAlert('Ошибка: Supabase не загружен');
-                console.error('Supabase не определен');
                 return;
             }
 
-            console.log('Supabase инициализирован:', supabase);
+            // Инициализируем клиент
+            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+            console.log('Supabase инициализирован:', supabaseClient);
 
             const registerForm = document.getElementById('registerForm');
             const alertBox = document.getElementById('alertBox');
@@ -104,7 +110,7 @@
                     console.log('Хеш пароля:', passwordHash);
 
                     // Вставляем пользователя в базу
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('users')
                         .insert([
                             {
@@ -128,22 +134,16 @@
                             } else {
                                 showAlert('Пользователь уже существует');
                             }
-                        } else if (error.code === '42501') {
-                            showAlert('Ошибка доступа. Проверьте сервисный ключ');
                         } else {
                             showAlert('Ошибка базы данных: ' + error.message);
                         }
                         return;
                     }
 
-                    if (data && data.length > 0) {
-                        showAlert('Регистрация успешна!', 'success');
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 2000);
-                    } else {
-                        showAlert('Неизвестная ошибка при регистрации');
-                    }
+                    showAlert('Регистрация успешна!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
 
                 } catch (error) {
                     console.error('Ошибка регистрации:', error);
