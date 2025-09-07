@@ -54,22 +54,19 @@
     </div>
 
     <script>
-        // Инициализация Supabase прямо в HTML
-        const SUPABASE_URL = 'https://ghpcfjbissjxazdepndr.supabase.co';
-        const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocGNmamJpc3NqeGF6ZGVwbmRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTU0NzgsImV4cCI6MjA3Mjc5MTQ3OH0.7K84ZwQVZ07Ode98druvxnrR9HbjMpotegorn1Ncex8';
+        // Инициализация Supabase с ANON KEY
+        const SUPABASE_URL = 'https://ваш-проект.supabase.co';
+        const SUPABASE_ANON_KEY = 'ваш-anon-key-здесь'; // Из Settings -> API -> anon public
         
-        // Ждем загрузки Supabase
         document.addEventListener('DOMContentLoaded', function() {
-            // Проверяем что Supabase загружен
             if (typeof supabase === 'undefined') {
-                console.error('Supabase не загружен');
                 showAlert('Ошибка: Supabase не загружен');
+                console.error('Supabase не определен');
                 return;
             }
 
-            // Инициализируем клиент
-            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-            console.log('Supabase инициализирован:', supabaseClient);
+            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase инициализирован с anon key');
 
             const registerForm = document.getElementById('registerForm');
             const alertBox = document.getElementById('alertBox');
@@ -105,11 +102,9 @@
                 registerBtn.textContent = 'Регистрация...';
 
                 try {
-                    // Хешируем пароль
                     const passwordHash = hashPassword(password);
                     console.log('Хеш пароля:', passwordHash);
 
-                    // Вставляем пользователя в базу
                     const { data, error } = await supabaseClient
                         .from('users')
                         .insert([
