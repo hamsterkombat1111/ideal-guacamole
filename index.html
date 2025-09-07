@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная - Supabase DB</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="container">
@@ -48,8 +50,15 @@
         </footer>
     </div>
 
+    <script src="supabase-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Проверка что Supabase загружен
+            if (typeof supabase === 'undefined') {
+                console.error('Supabase не загружен');
+                return;
+            }
+
             const authButton = document.getElementById('authButton');
             const userGreeting = document.getElementById('userGreeting');
             
