@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация - Supabase DB</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Supabase CDN -->
+    <!-- ПРАВИЛЬНЫЕ CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 </head>
@@ -59,8 +59,11 @@
             // Проверка что Supabase загружен
             if (typeof supabase === 'undefined') {
                 showAlert('Ошибка: Supabase не загружен');
+                console.error('Supabase не определен');
                 return;
             }
+
+            console.log('Supabase инициализирован:', supabase);
 
             const registerForm = document.getElementById('registerForm');
             const alertBox = document.getElementById('alertBox');
@@ -98,6 +101,7 @@
                 try {
                     // Хешируем пароль
                     const passwordHash = hashPassword(password);
+                    console.log('Хеш пароля:', passwordHash);
 
                     // Вставляем пользователя в базу
                     const { data, error } = await supabase
@@ -111,7 +115,11 @@
                         ])
                         .select();
 
+                    console.log('Результат запроса:', { data, error });
+
                     if (error) {
+                        console.error('Ошибка Supabase:', error);
+                        
                         if (error.code === '23505') {
                             if (error.message.includes('username')) {
                                 showAlert('Имя пользователя уже занято');
@@ -120,16 +128,22 @@
                             } else {
                                 showAlert('Пользователь уже существует');
                             }
+                        } else if (error.code === '42501') {
+                            showAlert('Ошибка доступа. Проверьте сервисный ключ');
                         } else {
-                            throw error;
+                            showAlert('Ошибка базы данных: ' + error.message);
                         }
                         return;
                     }
 
-                    showAlert('Регистрация успешна!', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
+                    if (data && data.length > 0) {
+                        showAlert('Регистрация успешна!', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        showAlert('Неизвестная ошибка при регистрации');
+                    }
 
                 } catch (error) {
                     console.error('Ошибка регистрации:', error);
