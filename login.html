@@ -44,21 +44,19 @@
     </div>
 
     <script>
-        // Инициализация Supabase прямо в HTML
+        // Инициализация Supabase с ANON KEY
         const SUPABASE_URL = 'https://ваш-проект.supabase.co';
-        const SUPABASE_SERVICE_KEY = 'ваш-сервисный-ключ';
+        const SUPABASE_ANON_KEY = 'ваш-anon-key-здесь'; // Из Settings -> API -> anon public
         
         document.addEventListener('DOMContentLoaded', function() {
-            // Проверка что Supabase загружен
             if (typeof supabase === 'undefined') {
                 showAlert('Ошибка: Supabase не загружен');
                 console.error('Supabase не загружен');
                 return;
             }
 
-            // Инициализируем клиент
-            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-            console.log('Supabase инициализирован:', supabaseClient);
+            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase инициализирован с anon key');
 
             const loginForm = document.getElementById('loginForm');
             const alertBox = document.getElementById('alertBox');
@@ -87,13 +85,15 @@
 
                 try {
                     const passwordHash = hashPassword(password);
+                    console.log('Поиск пользователя:', email, passwordHash);
 
-                    // Ищем пользователя в базе
                     const { data: users, error } = await supabaseClient
                         .from('users')
                         .select('*')
                         .eq('email', email)
                         .eq('password_hash', passwordHash);
+
+                    console.log('Результат поиска:', users, error);
 
                     if (error) {
                         console.error('Ошибка Supabase:', error);
@@ -101,23 +101,26 @@
                         return;
                     }
 
-                    if (users.length === 0) {
+                    if (!users || users.length === 0) {
                         showAlert('Неверный email или пароль');
                         return;
                     }
 
                     const user = users[0];
+                    console.log('Найден пользователь:', user);
 
-                    // Обновляем время последнего входа
-                    await supabaseClient
+                    const { error: updateError } = await supabaseClient
                         .from('users')
                         .update({ last_login: new Date().toISOString() })
                         .eq('id', user.id);
 
-                    // Сохраняем пользователя в sessionStorage
+                    if (updateError) {
+                        console.warn('Не удалось обновить last_login:', updateError);
+                    }
+
                     sessionStorage.setItem('currentUser', JSON.stringify(user));
 
-                    showAlert('Вход успешен!', 'success');
+                    showAlert('Вход успешен! Перенаправление...', 'success');
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
                     }, 1000);
@@ -131,7 +134,6 @@
                 }
             });
 
-            // Проверяем если уже авторизован
             const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
             if (currentUser) {
                 window.location.href = 'dashboard.html';
