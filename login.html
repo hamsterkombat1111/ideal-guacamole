@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - Supabase DB</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Вход в систему</h1>
+            <a href="index.html" class="btn btn-secondary">На главную</a>
+        </header>
+        
+        <main class="main-content">
+            <div id="alertBox"></div>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn" id="loginBtn">Войти</button>
+            </form>
+            
+            <p class="auth-link">
+                Нет аккаунта? <a href="register.html">Зарегистрируйтесь здесь</a>
+            </p>
+        </main>
+        
+        <footer>
+            <p>Supabase PostgreSQL | Чистая база данных</p>
+        </footer>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const alertBox = document.getElementById('alertBox');
+            const loginBtn = document.getElementById('loginBtn');
+
+            function showAlert(message, type = 'error') {
+                alertBox.innerHTML = `
+                    <div class="alert alert-${type}">
+                        ${message}
+                    </div>
+                `;
+            }
+
+            function hashPassword(password) {
+                return sha256(password);
+            }
+
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Вход...';
+
+                try {
+                    const passwordHash = hashPassword(password);
+
+                    // Ищем пользователя в базе
+                    const { data: users, error } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('email', email)
+                        .eq('password_hash', passwordHash);
+
+                    if (error) throw error;
+
+                    if (users.length === 0) {
+                        showAlert('Неверный email или пароль');
+                        return;
+                    }
+
+                    const user = users[0];
+
+                    // Обновляем время последнего входа
+                    await supabase
+                        .from('users')
+                        .update({ last_login: new Date().toISOString() })
+                        .eq('id', user.id);
+
+                    // Сохраняем пользователя в sessionStorage
+                    sessionStorage.setItem('currentUser', JSON.stringify(user));
+
+                    showAlert('Вход успешен!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Ошибка входа:', error);
+                    showAlert('Ошибка входа: ' + error.message);
+                } finally {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Войти';
+                }
+            });
+
+            // Проверяем если уже авторизован
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+            if (currentUser) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная - Supabase DB</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Supabase PostgreSQL</h1>
+            <div id="authState" class="auth-state">
+                <span id="userGreeting"></span>
+                <button id="authButton" class="btn" style="display: none;">Войти</button>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <div class="welcome-text">
+                <h2>🐘 Чистая PostgreSQL база</h2>
+                <p>Прямая работа с Supabase без аутентификации</p>
+            </div>
+            
+            <div class="auth-buttons">
+                <a href="login.html" class="btn">Вход</a>
+                <a href="register.html" class="btn btn-secondary">Регистрация</a>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <h3>Настоящий PostgreSQL</h3>
+                    <p>Полноценная реляционная база данных</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Прямые запросы</h3>
+                    <p>Без лишних слоёв аутентификации</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Простота</h3>
+                    <p>Чистый SQL и JavaScript</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Supabase PostgreSQL | Чистая база данных</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const authButton = document.getElementById('authButton');
+            const userGreeting = document.getElementById('userGreeting');
+            
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+            
+            if (currentUser) {
+                userGreeting.textContent = `Привет, ${currentUser.username}!`;
+                authButton.textContent = 'Выйти';
+                authButton.onclick = () => {
+                    sessionStorage.removeItem('currentUser');
+                    window.location.reload();
+                };
+            } else {
+                userGreeting.textContent = 'Вы не авторизованы';
+                authButton.textContent = 'Войти';
+                authButton.onclick = () => window.location.href = 'login.html';
+            }
+            authButton.style.display = 'inline-block';
+        });
+    </script>
+</body>
+</html>

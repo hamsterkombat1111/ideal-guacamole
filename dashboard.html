@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Supabase DB</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Личный кабинет</h1>
+            <a href="index.html" class="btn btn-secondary">На главную</a>
+        </header>
+        
+        <main class="main-content">
+            <div id="userInfo" class="user-info">
+                <h2>Информация о пользователе</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>ID:</label>
+                        <span id="userId">Загрузка...</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Имя пользователя:</label>
+                        <span id="userName">Загрузка...</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Email:</label>
+                        <span id="userEmail">Загрузка...</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Дата регистрации:</label>
+                        <span id="userCreated">Загрузка...</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Последний вход:</label>
+                        <span id="userLastLogin">Загрузка...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-actions">
+                <button id="logoutBtn" class="btn btn-secondary">Выйти</button>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Supabase PostgreSQL | Чистая база данных</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+            
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Заполняем информацию о пользователе
+            document.getElementById('userId').textContent = currentUser.id;
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            
+            // Форматируем даты
+            if (currentUser.created_at) {
+                document.getElementById('userCreated').textContent = 
+                    new Date(currentUser.created_at).toLocaleString('ru-RU');
+            }
+            
+            if (currentUser.last_login) {
+                document.getElementById('userLastLogin').textContent = 
+                    new Date(currentUser.last_login).toLocaleString('ru-RU');
+            }
+
+            // Выход
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                sessionStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>
