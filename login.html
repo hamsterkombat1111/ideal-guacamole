@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход - Supabase DB</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Supabase CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 </head>
 <body>
@@ -44,20 +42,7 @@
     </div>
 
     <script>
-        // Инициализация Supabase с ANON KEY
-        const SUPABASE_URL = 'https://ваш-проект.supabase.co';
-        const SUPABASE_ANON_KEY = 'ваш-anon-key-здесь'; // Из Settings -> API -> anon public
-        
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof supabase === 'undefined') {
-                showAlert('Ошибка: Supabase не загружен');
-                console.error('Supabase не загружен');
-                return;
-            }
-
-            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase инициализирован с anon key');
-
             const loginForm = document.getElementById('loginForm');
             const alertBox = document.getElementById('alertBox');
             const loginBtn = document.getElementById('loginBtn');
@@ -85,36 +70,36 @@
 
                 try {
                     const passwordHash = hashPassword(password);
-                    console.log('Поиск пользователя:', email, passwordHash);
+                    console.log('Отправка запроса на вход:', email);
 
-                    const { data: users, error } = await supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('email', email)
-                        .eq('password_hash', passwordHash);
+                    // Используем API route вместо прямого Supabase
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, passwordHash })
+                    });
 
-                    console.log('Результат поиска:', users, error);
+                    const result = await response.json();
 
-                    if (error) {
-                        console.error('Ошибка Supabase:', error);
-                        showAlert('Ошибка базы данных: ' + error.message);
-                        return;
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Ошибка входа');
                     }
 
-                    if (!users || users.length === 0) {
-                        showAlert('Неверный email или пароль');
-                        return;
-                    }
-
-                    const user = users[0];
+                    const user = result.user;
                     console.log('Найден пользователь:', user);
 
-                    const { error: updateError } = await supabaseClient
-                        .from('users')
-                        .update({ last_login: new Date().toISOString() })
-                        .eq('id', user.id);
-
-                    if (updateError) {
+                    // Обновляем время последнего входа через API
+                    try {
+                        await fetch('/api/update-login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ userId: user.id })
+                        });
+                    } catch (updateError) {
                         console.warn('Не удалось обновить last_login:', updateError);
                     }
 
