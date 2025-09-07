@@ -70,45 +70,33 @@
 
                 try {
                     const passwordHash = hashPassword(password);
-                    console.log('Отправка запроса на вход:', email);
 
-                    // Используем API route вместо прямого Supabase
                     const response = await fetch('/api/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ email, passwordHash })
+                        body: JSON.stringify({ 
+                            email: email, 
+                            passwordHash: passwordHash 
+                        })
                     });
 
-                    const result = await response.json();
+                    const data = await response.json();
 
                     if (!response.ok) {
-                        throw new Error(result.error || 'Ошибка входа');
+                        throw new Error(data.error || 'Ошибка входа');
                     }
 
-                    const user = result.user;
-                    console.log('Найден пользователь:', user);
-
-                    // Обновляем время последнего входа через API
-                    try {
-                        await fetch('/api/update-login', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ userId: user.id })
-                        });
-                    } catch (updateError) {
-                        console.warn('Не удалось обновить last_login:', updateError);
+                    if (data.success) {
+                        sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+                        showAlert('Вход успешен! Перенаправление...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                    } else {
+                        throw new Error(data.error || 'Ошибка входа');
                     }
-
-                    sessionStorage.setItem('currentUser', JSON.stringify(user));
-
-                    showAlert('Вход успешен! Перенаправление...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
 
                 } catch (error) {
                     console.error('Ошибка входа:', error);
