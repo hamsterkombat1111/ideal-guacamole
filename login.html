@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход - Supabase DB</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 </head>
@@ -45,6 +46,12 @@
     <script src="supabase-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Проверка что Supabase загружен
+            if (typeof supabase === 'undefined') {
+                showAlert('Ошибка: Supabase не загружен');
+                return;
+            }
+
             const loginForm = document.getElementById('loginForm');
             const alertBox = document.getElementById('alertBox');
             const loginBtn = document.getElementById('loginBtn');
