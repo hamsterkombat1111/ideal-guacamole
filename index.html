@@ -50,12 +50,12 @@
         </footer>
     </div>
 
-    <script src="supabase-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Проверка что Supabase загружен
             if (typeof supabase === 'undefined') {
                 console.error('Supabase не загружен');
+                document.getElementById('userGreeting').textContent = 'Ошибка загрузки';
                 return;
             }
 
