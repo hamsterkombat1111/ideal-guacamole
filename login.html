@@ -43,14 +43,22 @@
         </footer>
     </div>
 
-    <script src="supabase-config.js"></script>
     <script>
+        // Инициализация Supabase прямо в HTML
+        const SUPABASE_URL = 'https://ваш-проект.supabase.co';
+        const SUPABASE_SERVICE_KEY = 'ваш-сервисный-ключ';
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Проверка что Supabase загружен
             if (typeof supabase === 'undefined') {
                 showAlert('Ошибка: Supabase не загружен');
+                console.error('Supabase не загружен');
                 return;
             }
+
+            // Инициализируем клиент
+            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+            console.log('Supabase инициализирован:', supabaseClient);
 
             const loginForm = document.getElementById('loginForm');
             const alertBox = document.getElementById('alertBox');
@@ -81,13 +89,17 @@
                     const passwordHash = hashPassword(password);
 
                     // Ищем пользователя в базе
-                    const { data: users, error } = await supabase
+                    const { data: users, error } = await supabaseClient
                         .from('users')
                         .select('*')
                         .eq('email', email)
                         .eq('password_hash', passwordHash);
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Ошибка Supabase:', error);
+                        showAlert('Ошибка базы данных: ' + error.message);
+                        return;
+                    }
 
                     if (users.length === 0) {
                         showAlert('Неверный email или пароль');
@@ -97,7 +109,7 @@
                     const user = users[0];
 
                     // Обновляем время последнего входа
-                    await supabase
+                    await supabaseClient
                         .from('users')
                         .update({ last_login: new Date().toISOString() })
                         .eq('id', user.id);
